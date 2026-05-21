@@ -77,14 +77,14 @@ export default function TradingApp() {
       </div>
 
       {/* Status Bar */}
-      <div className="h-6 flex items-center px-3 gap-4 bg-tv-surface border-t border-tv-border shrink-0 text-xs text-tv-text-dim">
-        <span className="text-tv-green font-mono flex items-center gap-1">
+      <div className="h-5 flex items-center px-3 gap-4 bg-tv-bg border-t border-tv-border shrink-0 text-[10px] text-tv-text-dim font-mono">
+        <span className="text-tv-green flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 bg-tv-green rounded-full animate-pulse" />
-          Connected
+          LIVE
         </span>
-        <span>TechnoBiz Trader AI</span>
-        <span className="ml-auto">Powered by DeepSeek + OpenRouter</span>
-        <span className="text-tv-text-dim">Not financial advice</span>
+        <span className="hidden sm:inline text-tv-text-dim/60">|</span>
+        <span className="hidden sm:inline">TechnoBiz Trader AI v2</span>
+        <span className="ml-auto hidden md:inline text-tv-text-dim/50">AI by OpenRouter · Not financial advice</span>
       </div>
     </div>
   )

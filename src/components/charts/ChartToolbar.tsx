@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, TrendingUp, BarChart2, LineChart, Activity, Plus, Trash2, Search, RotateCcw } from 'lucide-react'
+import { ChevronDown, TrendingUp, BarChart2, LineChart, Activity, Trash2, Search, Zap } from 'lucide-react'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { useAIAnalysis } from '@/hooks/useAIAnalysis'
 import { useChartData } from '@/hooks/useChartData'
-import { Button } from '@/components/ui/button'
 import { TIMEFRAMES } from '@/lib/constants'
 import type { TimeFrame } from '@/types/market'
 import type { IndicatorType } from '@/types/chart'
@@ -30,7 +29,7 @@ const INDICATORS_LIST: { type: IndicatorType; label: string }[] = [
 ]
 
 export default function ChartToolbar() {
-  const { layout, setActivePane, updatePane, setPaneTimeframe } = useWorkspaceStore()
+  const { layout, updatePane, setPaneTimeframe } = useWorkspaceStore()
   const [showIndicators, setShowIndicators] = useState(false)
   const [showSymbolInput, setShowSymbolInput] = useState(false)
   const [symbolInput, setSymbolInput] = useState('')
@@ -59,17 +58,24 @@ export default function ChartToolbar() {
   const addIndicator = (type: IndicatorType, label: string) => {
     setShowIndicators(false)
 
-    // Volume: first click hides bars, second click shows them again
     if (type === 'VOLUME') {
       const existing = activePane.indicators.find(i => i.type === 'VOLUME')
       if (existing) {
+        updatePane(activePane.id, { indicators: activePane.indicators.filter(i => i.id !== existing.id) })
+      } else {
+        updatePane(activePane.id, { indicators: [...activePane.indicators, { id: generateId(), type, params: { period: 0 }, visible: false }] })
+      }
+      return
+    }
+
+    if (type === 'MACD') {
+      const existing = activePane.indicators.find(i => i.type === 'MACD')
+      if (existing) {
         updatePane(activePane.id, {
-          indicators: activePane.indicators.filter(i => i.id !== existing.id),
+          indicators: activePane.indicators.map(i => i.id === existing.id ? { ...i, visible: !i.visible } : i),
         })
       } else {
-        updatePane(activePane.id, {
-          indicators: [...activePane.indicators, { id: generateId(), type, params: { period: 0 }, visible: false }],
-        })
+        updatePane(activePane.id, { indicators: [...activePane.indicators, { id: generateId(), type, params: { period: 0 }, visible: true }] })
       }
       return
     }
@@ -79,9 +85,7 @@ export default function ChartToolbar() {
     const existing = activePane.indicators.find(i => i.type === type && i.params.period === period)
     if (existing) {
       updatePane(activePane.id, {
-        indicators: activePane.indicators.map(i =>
-          i.id === existing.id ? { ...i, visible: !i.visible } : i
-        ),
+        indicators: activePane.indicators.map(i => i.id === existing.id ? { ...i, visible: !i.visible } : i),
       })
       return
     }
@@ -92,22 +96,17 @@ export default function ChartToolbar() {
   }
 
   const handleAIAnalysis = () => {
-    analyzeMarket({
-      symbol: activePane.symbol,
-      timeframe: activePane.timeframe,
-      candles,
-      includeTradeSetup: true,
-    })
+    analyzeMarket({ symbol: activePane.symbol, timeframe: activePane.timeframe, candles, includeTradeSetup: true })
   }
 
   return (
-    <div className="flex items-center gap-1 px-2 py-1 bg-tv-surface border-b border-tv-border overflow-x-auto scrollbar-hide">
+    <div className="flex items-center gap-0.5 px-2 h-9 bg-tv-surface border-b border-tv-border overflow-x-auto scrollbar-hide shrink-0">
       {/* Symbol */}
-      <div className="flex items-center gap-1 mr-1">
+      <div className="flex items-center mr-1">
         {showSymbolInput ? (
           <form onSubmit={handleSymbolSubmit} className="flex items-center gap-1">
             <input
-              className="bg-tv-bg border border-tv-accent rounded px-2 py-0.5 text-sm text-white w-24 focus:outline-none"
+              className="bg-tv-bg border border-tv-accent rounded px-2 py-0.5 text-xs text-white w-24 focus:outline-none font-mono"
               value={symbolInput}
               onChange={e => setSymbolInput(e.target.value)}
               placeholder={activePane.symbol}
@@ -117,27 +116,27 @@ export default function ChartToolbar() {
           </form>
         ) : (
           <button
-            className="flex items-center gap-1 text-white font-bold text-sm px-2 py-1 rounded hover:bg-tv-border transition-colors"
+            className="flex items-center gap-1 text-white font-bold text-xs px-2 py-1 rounded hover:bg-tv-border transition-colors font-mono"
             onClick={() => setShowSymbolInput(true)}
           >
             <Search className="w-3 h-3 text-tv-text-dim" />
-            <span className="font-mono">{activePane.symbol}</span>
+            <span>{activePane.symbol}</span>
             <ChevronDown className="w-3 h-3 text-tv-text-dim" />
           </button>
         )}
       </div>
 
-      <div className="w-px h-5 bg-tv-border mx-1" />
+      <div className="w-px h-4 bg-tv-border mx-1 shrink-0" />
 
       {/* Timeframes */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-px">
         {TIMEFRAMES.map(tf => (
           <button
             key={tf.value}
             onClick={() => handleTimeframe(tf.value)}
-            className={`px-2 py-0.5 text-xs rounded transition-colors ${
+            className={`px-1.5 py-0.5 text-[11px] rounded font-mono transition-colors ${
               activePane.timeframe === tf.value
-                ? 'bg-tv-accent text-white'
+                ? 'bg-tv-accent text-white font-semibold'
                 : 'text-tv-text-dim hover:text-white hover:bg-tv-border'
             }`}
           >
@@ -146,64 +145,100 @@ export default function ChartToolbar() {
         ))}
       </div>
 
-      <div className="w-px h-5 bg-tv-border mx-1" />
+      <div className="w-px h-4 bg-tv-border mx-1 shrink-0" />
 
       {/* Chart Type */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-px">
         {(Object.keys(CHART_TYPE_ICONS) as (keyof typeof CHART_TYPE_ICONS)[]).map(type => {
           const Icon = CHART_TYPE_ICONS[type]
           return (
             <button
               key={type}
               onClick={() => updatePane(activePane.id, { chartType: type })}
-              className={`p-1.5 rounded transition-colors ${
+              className={`p-1 rounded transition-colors ${
                 activePane.chartType === type
                   ? 'bg-tv-accent text-white'
                   : 'text-tv-text-dim hover:text-white hover:bg-tv-border'
               }`}
               title={type}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5" />
             </button>
           )
         })}
       </div>
 
-      <div className="w-px h-5 bg-tv-border mx-1" />
+      <div className="w-px h-4 bg-tv-border mx-1 shrink-0" />
 
       {/* Indicators */}
       <div className="relative">
         <button
           onClick={() => setShowIndicators(!showIndicators)}
-          className="flex items-center gap-1 text-tv-text-dim hover:text-white hover:bg-tv-border px-2 py-1 rounded text-xs transition-colors"
+          className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${
+            showIndicators ? 'bg-tv-border text-white' : 'text-tv-text-dim hover:text-white hover:bg-tv-border'
+          }`}
         >
           <TrendingUp className="w-3.5 h-3.5" />
           <span>Indicators</span>
-          <ChevronDown className="w-3 h-3" />
+          {activePane.indicators.length > 0 && (
+            <span className="bg-tv-accent text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-mono">
+              {activePane.indicators.filter(i => i.visible).length}
+            </span>
+          )}
+          <ChevronDown className={`w-3 h-3 transition-transform ${showIndicators ? 'rotate-180' : ''}`} />
         </button>
+
         {showIndicators && (
-          <div className="absolute top-full left-0 mt-1 bg-tv-surface border border-tv-border rounded-lg shadow-xl z-50 min-w-[180px] py-1">
-            {INDICATORS_LIST.map(({ type, label }) => (
-              <button
-                key={label}
-                onClick={() => addIndicator(type, label)}
-                className="w-full text-left px-3 py-1.5 text-sm text-tv-text hover:bg-tv-border hover:text-white transition-colors"
-              >
-                {label}
-              </button>
-            ))}
+          <div className="absolute top-full left-0 mt-1 bg-tv-surface-2 border border-tv-border rounded-lg shadow-2xl z-50 min-w-[200px] py-1 backdrop-blur-sm">
+            <div className="px-3 py-1.5 text-[10px] text-tv-text-dim uppercase tracking-wider font-semibold border-b border-tv-border mb-1">
+              Overlay Indicators
+            </div>
+            {INDICATORS_LIST.filter(i => !['RSI', 'MACD'].includes(i.type)).map(({ type, label }) => {
+              const periodMatch = label.match(/\d+/)
+              const period = periodMatch ? parseInt(periodMatch[0]) : 0
+              const isActive = type === 'VOLUME'
+                ? activePane.indicators.some(i => i.type === 'VOLUME')
+                : activePane.indicators.some(i => i.type === type && i.params.period === period && i.visible)
+              return (
+                <button
+                  key={label}
+                  onClick={() => addIndicator(type, label)}
+                  className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                    isActive ? 'text-tv-accent' : 'text-tv-text hover:bg-tv-border hover:text-white'
+                  }`}
+                >
+                  <span>{label}</span>
+                  {isActive && <div className="w-1.5 h-1.5 rounded-full bg-tv-accent" />}
+                </button>
+              )
+            })}
+            <div className="px-3 py-1.5 text-[10px] text-tv-text-dim uppercase tracking-wider font-semibold border-t border-b border-tv-border my-1">
+              Oscillators
+            </div>
+            {INDICATORS_LIST.filter(i => ['RSI', 'MACD'].includes(i.type)).map(({ type, label }) => {
+              const isActive = activePane.indicators.some(i => i.type === type && i.visible)
+              return (
+                <button
+                  key={label}
+                  onClick={() => addIndicator(type, label)}
+                  className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                    isActive ? 'text-tv-accent' : 'text-tv-text hover:bg-tv-border hover:text-white'
+                  }`}
+                >
+                  <span>{label}</span>
+                  {isActive && <div className="w-1.5 h-1.5 rounded-full bg-tv-accent" />}
+                </button>
+              )
+            })}
             {activePane.indicators.length > 0 && (
               <>
                 <div className="h-px bg-tv-border my-1" />
                 <button
-                  onClick={() => {
-                    updatePane(activePane.id, { indicators: [] })
-                    setShowIndicators(false)
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-sm text-tv-red hover:bg-tv-border transition-colors flex items-center gap-2"
+                  onClick={() => { updatePane(activePane.id, { indicators: [] }); setShowIndicators(false) }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-tv-red hover:bg-tv-border transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  Clear all
+                  Clear all indicators
                 </button>
               </>
             )}
@@ -213,16 +248,14 @@ export default function ChartToolbar() {
 
       <div className="flex-1" />
 
-      {/* AI Analyze Button */}
-      <Button
-        size="sm"
-        variant="default"
+      {/* AI Analyze */}
+      <button
         onClick={handleAIAnalysis}
-        className="text-xs h-7 gap-1.5 shrink-0"
+        className="flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold bg-tv-accent hover:bg-tv-accent-hover text-white transition-colors shrink-0"
       >
-        <Activity className="w-3.5 h-3.5" />
+        <Zap className="w-3.5 h-3.5" fill="white" />
         AI Analyze
-      </Button>
+      </button>
     </div>
   )
 }

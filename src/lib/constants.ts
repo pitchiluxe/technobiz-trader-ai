@@ -45,16 +45,16 @@ export const DEFAULT_WATCHLIST = [
 ]
 
 export const CHART_COLORS = {
-  upColor: '#089981',
-  downColor: '#F23645',
-  borderUpColor: '#089981',
-  borderDownColor: '#F23645',
-  wickUpColor: '#089981',
-  wickDownColor: '#F23645',
-  background: '#0F1117',
-  grid: '#1B1F2E',
-  text: '#787B86',
-  crosshair: '#2D3148',
+  upColor: '#10B981',
+  downColor: '#EF4444',
+  borderUpColor: '#10B981',
+  borderDownColor: '#EF4444',
+  wickUpColor: '#10B981',
+  wickDownColor: '#EF4444',
+  background: '#070A10',
+  grid: '#1C2333',
+  text: '#64748B',
+  crosshair: '#243044',
 }
 
 export const INDICATOR_COLORS = {
