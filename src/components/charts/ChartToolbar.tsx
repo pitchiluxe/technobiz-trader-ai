@@ -57,22 +57,38 @@ export default function ChartToolbar() {
   }
 
   const addIndicator = (type: IndicatorType, label: string) => {
+    setShowIndicators(false)
+
+    // Volume: first click hides bars, second click shows them again
+    if (type === 'VOLUME') {
+      const existing = activePane.indicators.find(i => i.type === 'VOLUME')
+      if (existing) {
+        updatePane(activePane.id, {
+          indicators: activePane.indicators.filter(i => i.id !== existing.id),
+        })
+      } else {
+        updatePane(activePane.id, {
+          indicators: [...activePane.indicators, { id: generateId(), type, params: { period: 0 }, visible: false }],
+        })
+      }
+      return
+    }
+
     const periodMatch = label.match(/\d+/)
     const period = periodMatch ? parseInt(periodMatch[0]) : 14
     const existing = activePane.indicators.find(i => i.type === type && i.params.period === period)
     if (existing) {
-      // Toggle visibility instead of ignoring
-      const updated = activePane.indicators.map(i =>
-        i.id === existing.id ? { ...i, visible: !i.visible } : i
-      )
-      updatePane(activePane.id, { indicators: updated })
-      setShowIndicators(false)
+      updatePane(activePane.id, {
+        indicators: activePane.indicators.map(i =>
+          i.id === existing.id ? { ...i, visible: !i.visible } : i
+        ),
+      })
       return
     }
 
-    const ind = { id: generateId(), type, params: { period }, visible: true }
-    updatePane(activePane.id, { indicators: [...activePane.indicators, ind] })
-    setShowIndicators(false)
+    updatePane(activePane.id, {
+      indicators: [...activePane.indicators, { id: generateId(), type, params: { period }, visible: true }],
+    })
   }
 
   const handleAIAnalysis = () => {

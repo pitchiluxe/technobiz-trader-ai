@@ -136,11 +136,9 @@ export default function ChartWidget({ pane, isActive, onActivate }: Props) {
   const updateIndicators = useCallback(async (sorted: Candle[]) => {
     if (!chartRef.current) return
 
-    // Handle volume visibility
-    const volumeInd = pane.indicators.find(i => i.type === 'VOLUME')
-    if (volumeSeriesRef.current) {
-      volumeSeriesRef.current.applyOptions({ visible: !volumeInd || volumeInd.visible })
-    }
+    // Volume: hidden when VOLUME indicator is in the list, shown by default
+    const hasVolumeIndicator = pane.indicators.some(i => i.type === 'VOLUME')
+    volumeSeriesRef.current?.applyOptions({ visible: !hasVolumeIndicator })
 
     indicatorSeriesRef.current.forEach(s => {
       try { chartRef.current?.removeSeries(s) } catch {}

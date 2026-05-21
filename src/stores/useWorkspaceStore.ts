@@ -54,7 +54,7 @@ interface WorkspaceState {
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     immer((set) => ({
-      layout: makeDefaultLayout('quad'),
+      layout: makeDefaultLayout('single'),
       sidebarLeft: true,
       sidebarRight: true,
       bottomPanel: false,
