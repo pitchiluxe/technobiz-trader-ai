@@ -5,7 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatPrice(price: number, decimals = 2): string {
+export function formatPrice(price: number | null | undefined, decimals = 2): string {
+  if (price == null || !isFinite(price)) return '—'
   if (price >= 1000) return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   if (price >= 1) return price.toFixed(decimals)
   if (price >= 0.01) return price.toFixed(4)

@@ -77,8 +77,8 @@ export default function MarketOverview() {
             </div>
             <div className="text-right">
               <div className="text-sm font-mono text-white">${formatPrice(item.price)}</div>
-              <div className={`text-xs font-mono ${item.changePercent >= 0 ? 'text-tv-green' : 'text-tv-red'}`}>
-                {item.changePercent >= 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
+              <div className={`text-xs font-mono ${(item.changePercent ?? 0) >= 0 ? 'text-tv-green' : 'text-tv-red'}`}>
+                {(item.changePercent ?? 0) >= 0 ? '+' : ''}{(item.changePercent ?? 0).toFixed(2)}%
               </div>
             </div>
           </div>

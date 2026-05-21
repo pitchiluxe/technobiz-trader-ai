@@ -110,8 +110,8 @@ export default function WatchlistPanel() {
                   <div className="text-right text-sm font-mono text-white tabular-nums">
                     {q ? formatPrice(q.price) : '—'}
                   </div>
-                  <div className={`text-right text-xs font-mono w-14 tabular-nums ${q ? getChangeColor(q.changePercent) : 'text-tv-text-dim'}`}>
-                    {q ? `${q.changePercent >= 0 ? '+' : ''}${q.changePercent.toFixed(2)}%` : '—'}
+                  <div className={`text-right text-xs font-mono w-14 tabular-nums ${q ? getChangeColor(q.changePercent ?? 0) : 'text-tv-text-dim'}`}>
+                    {q ? `${(q.changePercent ?? 0) >= 0 ? '+' : ''}${(q.changePercent ?? 0).toFixed(2)}%` : '—'}
                   </div>
                 </div>
                 <button
