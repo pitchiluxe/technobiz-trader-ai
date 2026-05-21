@@ -10,20 +10,18 @@ export function useWatchlistTicker() {
 
   const fetchQuotes = useCallback(async () => {
     if (items.length === 0) return
-    const cryptoSymbols = items.filter(i => i.type === 'crypto').map(i => i.symbol)
+    const allSymbols = items.map(i => i.symbol)
 
     try {
-      if (cryptoSymbols.length > 0) {
-        const promises = cryptoSymbols.map(sym =>
-          fetch(`/api/market/quote?symbol=${sym}`).then(r => r.ok ? r.json() : null)
-        )
-        const results = await Promise.all(promises)
-        const quotes: Record<string, Quote> = {}
-        results.forEach((q, i) => {
-          if (q) quotes[cryptoSymbols[i]] = q
-        })
-        updateQuotes(quotes)
-      }
+      const promises = allSymbols.map(sym =>
+        fetch(`/api/market/quote?symbol=${sym}`).then(r => r.ok ? r.json() : null)
+      )
+      const results = await Promise.all(promises)
+      const quotes: Record<string, Quote> = {}
+      results.forEach((q, i) => {
+        if (q) quotes[allSymbols[i]] = q
+      })
+      updateQuotes(quotes)
     } catch {}
   }, [items, updateQuotes])
 

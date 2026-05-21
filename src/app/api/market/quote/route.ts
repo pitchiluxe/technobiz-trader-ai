@@ -4,8 +4,8 @@ import { toYahooSymbol, isCryptoSymbol } from '@/lib/symbolMap'
 async function fetchBinanceQuote(symbol: string) {
   const sym = symbol.toUpperCase()
   const [priceRes, statsRes] = await Promise.all([
-    fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}`, { next: { revalidate: 10 } }),
-    fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`, { next: { revalidate: 10 } }),
+    fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}`, { cache: 'no-store' }),
+    fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`, { cache: 'no-store' }),
   ])
 
   if (!priceRes.ok || !statsRes.ok) throw new Error(`Binance quote failed`)
@@ -30,7 +30,7 @@ async function fetchYahooQuote(displaySymbol: string) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooTicker)}?interval=1d&range=1d`
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 30 },
+    cache: 'no-store',
   })
 
   if (!res.ok) throw new Error(`Yahoo quote failed: ${res.status}`)

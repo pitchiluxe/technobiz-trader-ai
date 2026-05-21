@@ -7,7 +7,7 @@ async function fetchYahooCandles(displaySymbol: string, interval: string, range:
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooTicker)}?interval=${interval}&range=${range}`
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
-    next: { revalidate: 60 },
+    cache: 'no-store',
   })
 
   if (!res.ok) throw new Error(`Yahoo Finance error: ${res.status}`)
@@ -33,7 +33,7 @@ async function fetchBinanceCandles(symbol: string, interval: string, limit: numb
   const sym = symbol.toUpperCase()
   const res = await fetch(
     `https://api.binance.com/api/v3/klines?symbol=${sym}&interval=${interval}&limit=${limit}`,
-    { next: { revalidate: 30 } }
+    { cache: 'no-store' }
   )
   if (!res.ok) throw new Error(`Binance error: ${res.status}`)
   const data = await res.json()

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Candle, TimeFrame } from '@/types/market'
 import { providerFactory } from '@/services/dataProviders/ProviderFactory'
+import { isCryptoSymbol } from '@/lib/symbolMap'
 
 interface UseChartDataOptions {
   symbol: string
@@ -30,6 +31,7 @@ export function useChartData({
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState(0)
   const unsubRef = useRef<(() => void) | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevKey = useRef('')
 
   const fetchCandles = useCallback(async () => {
@@ -69,23 +71,31 @@ export function useChartData({
 
     fetchCandles()
 
-    // Subscribe to live updates (only for crypto/binance)
-    const provider = providerFactory.getForSymbol(symbol)
-    if (provider.subscribeToCandleUpdates) {
-      unsubRef.current = provider.subscribeToCandleUpdates(symbol, timeframe, (newCandle) => {
-        setCandles(prev => {
-          if (prev.length === 0) return [newCandle]
-          const last = prev[prev.length - 1]
-          if (last.time === newCandle.time) {
-            return [...prev.slice(0, -1), newCandle]
-          }
-          return [...prev.slice(-limit + 1), newCandle]
+    if (isCryptoSymbol(symbol)) {
+      // Subscribe to live updates via Binance WebSocket
+      const provider = providerFactory.getForSymbol(symbol)
+      if (provider.subscribeToCandleUpdates) {
+        unsubRef.current = provider.subscribeToCandleUpdates(symbol, timeframe, (newCandle) => {
+          setCandles(prev => {
+            if (prev.length === 0) return [newCandle]
+            const last = prev[prev.length - 1]
+            if (last.time === newCandle.time) {
+              return [...prev.slice(0, -1), newCandle]
+            }
+            return [...prev.slice(-limit + 1), newCandle]
+          })
+          setLastUpdate(Date.now())
         })
-        setLastUpdate(Date.now())
-      })
+      }
+    } else {
+      // Poll every 60s for non-crypto (Yahoo Finance has no WebSocket)
+      pollRef.current = setInterval(fetchCandles, 60000)
     }
 
-    return () => { if (unsubRef.current) { unsubRef.current(); unsubRef.current = null } }
+    return () => {
+      if (unsubRef.current) { unsubRef.current(); unsubRef.current = null }
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
+    }
   }, [symbol, timeframe, fetchCandles, limit])
 
   return { candles, isLoading, error, refetch: fetchCandles, lastUpdate }
