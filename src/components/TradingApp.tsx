@@ -3,88 +3,37 @@
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import TopBar from '@/components/layout/TopBar'
 import ChartContainer from '@/components/charts/ChartContainer'
-import ChartToolbar from '@/components/charts/ChartToolbar'
 import WatchlistPanel from '@/components/watchlist/WatchlistPanel'
 import AIAssistant from '@/components/ai/AIAssistant'
-import AISignalsPanel from '@/components/ai/AISignalsPanel'
-import MarketOverview from '@/components/market/MarketOverview'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
 
 export default function TradingApp() {
-  const { sidebarLeft, sidebarRight, rightTab, setRightTab } = useWorkspaceStore()
+  const { sidebarLeft, sidebarRight } = useWorkspaceStore()
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-tv-bg select-none">
-      {/* Top Navigation Bar */}
       <TopBar />
-
-      {/* Chart Toolbar */}
-      <ChartToolbar />
-
-      {/* Main Trading Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar — Watchlist */}
         {sidebarLeft && (
-          <>
-            <div className="w-52 shrink-0 flex flex-col border-r border-tv-border overflow-hidden">
-              <Tabs defaultValue="watchlist" className="flex flex-col h-full">
-                <TabsList className="mx-2 mt-2 mb-0 h-8 shrink-0">
-                  <TabsTrigger value="watchlist" className="text-xs flex-1">Watchlist</TabsTrigger>
-                  <TabsTrigger value="overview" className="text-xs flex-1">Market</TabsTrigger>
-                </TabsList>
-                <TabsContent value="watchlist" className="flex-1 overflow-hidden m-0 mt-1">
-                  <WatchlistPanel />
-                </TabsContent>
-                <TabsContent value="overview" className="flex-1 overflow-hidden m-0 mt-1">
-                  <MarketOverview />
-                </TabsContent>
-              </Tabs>
-            </div>
-            <Separator orientation="vertical" className="shrink-0" />
-          </>
+          <div className="w-[252px] shrink-0 flex flex-col border-r border-tv-border overflow-hidden bg-tv-surface">
+            <WatchlistPanel />
+          </div>
         )}
-
-        {/* Charts Area */}
         <div className="flex-1 overflow-hidden">
           <ChartContainer />
         </div>
-
-        {/* Right Sidebar — AI Panel */}
         {sidebarRight && (
-          <>
-            <Separator orientation="vertical" className="shrink-0" />
-            <div className="w-72 shrink-0 flex flex-col border-l border-tv-border overflow-hidden">
-              <Tabs
-                value={rightTab}
-                onValueChange={(v) => setRightTab(v as 'ai' | 'signals' | 'overview')}
-                className="flex flex-col h-full"
-              >
-                <TabsList className="mx-2 mt-2 mb-0 h-8 shrink-0">
-                  <TabsTrigger value="ai" className="text-xs flex-1">AI Chat</TabsTrigger>
-                  <TabsTrigger value="signals" className="text-xs flex-1">Signals</TabsTrigger>
-                </TabsList>
-                <TabsContent value="ai" className="flex-1 overflow-hidden m-0">
-                  <AIAssistant />
-                </TabsContent>
-                <TabsContent value="signals" className="flex-1 overflow-hidden m-0">
-                  <AISignalsPanel />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </>
+          <div className="w-[280px] shrink-0 flex flex-col border-l border-tv-border overflow-hidden bg-tv-surface">
+            <AIAssistant />
+          </div>
         )}
       </div>
-
-      {/* Status Bar */}
-      <div className="h-5 flex items-center px-3 gap-4 bg-tv-bg border-t border-tv-border shrink-0 text-[10px] text-tv-text-dim font-mono">
-        <span className="text-tv-green flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 bg-tv-green rounded-full animate-pulse" />
-          LIVE
+      <div className="h-[22px] flex items-center px-3 gap-3 bg-tv-surface border-t border-tv-border shrink-0">
+        <span className="flex items-center gap-1.5 text-[11px] font-mono text-tv-green">
+          <span className="w-1.5 h-1.5 rounded-full bg-tv-green animate-pulse inline-block" />
+          Connected
         </span>
-        <span className="hidden sm:inline text-tv-text-dim/60">|</span>
-        <span className="hidden sm:inline">TechnoBiz Trader AI v2</span>
-        <span className="ml-auto hidden md:inline text-tv-text-dim/50">AI by OpenRouter · Not financial advice</span>
+        <span className="text-[11px] text-tv-text-dim">TechnoBiz Trader AI</span>
+        <span className="ml-auto text-[11px] text-tv-text-dim opacity-60">Not financial advice</span>
       </div>
     </div>
   )
