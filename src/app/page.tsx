@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import TopBar from '@/components/layout/TopBar'
 import ChartContainer from '@/components/charts/ChartContainer'
@@ -12,6 +13,24 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 
 export default function TradingTerminal() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!mounted) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#0F1117]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-[#2962FF] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[#787B86] text-sm tracking-wide">Initializing TechnoBiz Trader AI...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return <TradingApp />
+}
+
+function TradingApp() {
   const { sidebarLeft, sidebarRight, rightTab, setRightTab } = useWorkspaceStore()
 
   return (
