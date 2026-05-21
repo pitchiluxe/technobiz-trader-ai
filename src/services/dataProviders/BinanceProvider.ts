@@ -14,54 +14,21 @@ export class BinanceProvider implements IDataProvider {
   private ws: Map<string, WebSocket> = new Map()
 
   async fetchCandles(req: MarketDataRequest): Promise<Candle[]> {
-    const tf = TF_MAP[req.timeframe] ?? '1h'
-    const limit = req.limit ?? 500
-    const symbol = req.symbol.toUpperCase()
-
+    // Binance REST does not send CORS headers — must route through server proxy
     const params = new URLSearchParams({
-      symbol,
-      interval: tf,
-      limit: String(Math.min(limit, 1000)),
+      symbol: req.symbol.toUpperCase(),
+      timeframe: req.timeframe,
+      limit: String(Math.min(req.limit ?? 500, 1000)),
     })
-
-    if (req.from) params.set('startTime', String(req.from * 1000))
-    if (req.to) params.set('endTime', String(req.to * 1000))
-
-    const res = await fetch(`${BINANCE_REST}/api/v3/klines?${params}`)
-    if (!res.ok) throw new Error(`Binance fetch failed: ${res.status}`)
-
-    const data = await res.json()
-    return data.map((k: number[]) => ({
-      time: Math.floor(k[0] / 1000),
-      open: parseFloat(String(k[1])),
-      high: parseFloat(String(k[2])),
-      low: parseFloat(String(k[3])),
-      close: parseFloat(String(k[4])),
-      volume: parseFloat(String(k[5])),
-    }))
+    const res = await fetch(`/api/market/candles?${params}`)
+    if (!res.ok) throw new Error(`Candles failed: ${res.status}`)
+    return res.json()
   }
 
   async fetchQuote(symbol: string): Promise<Quote> {
-    const sym = symbol.toUpperCase()
-    const [tickerRes, statsRes] = await Promise.all([
-      fetch(`${BINANCE_REST}/api/v3/ticker/price?symbol=${sym}`),
-      fetch(`${BINANCE_REST}/api/v3/ticker/24hr?symbol=${sym}`),
-    ])
-
-    const [ticker, stats] = await Promise.all([tickerRes.json(), statsRes.json()])
-
-    return {
-      symbol: sym,
-      price: parseFloat(ticker.price),
-      change: parseFloat(stats.priceChange),
-      changePercent: parseFloat(stats.priceChangePercent),
-      volume: parseFloat(stats.volume),
-      high: parseFloat(stats.highPrice),
-      low: parseFloat(stats.lowPrice),
-      open: parseFloat(stats.openPrice),
-      prevClose: parseFloat(stats.prevClosePrice),
-      timestamp: Math.floor(Date.now() / 1000),
-    }
+    const res = await fetch(`/api/market/quote?symbol=${encodeURIComponent(symbol.toUpperCase())}`)
+    if (!res.ok) throw new Error(`Quote failed: ${res.status}`)
+    return res.json()
   }
 
   async searchSymbols(query: string): Promise<Symbol[]> {

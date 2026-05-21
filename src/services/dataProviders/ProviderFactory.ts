@@ -1,14 +1,14 @@
 import type { IDataProvider } from './types'
 import { BinanceProvider } from './BinanceProvider'
 import { YahooFinanceProvider } from './YahooFinanceProvider'
-import { isCrypto } from '@/lib/utils'
+import { isCryptoSymbol } from '@/lib/symbolMap'
 
 class ProviderRegistry {
   private binance = new BinanceProvider()
   private yahoo = new YahooFinanceProvider()
 
   getForSymbol(symbol: string): IDataProvider {
-    if (isCrypto(symbol)) return this.binance
+    if (isCryptoSymbol(symbol)) return this.binance
     return this.yahoo
   }
 
