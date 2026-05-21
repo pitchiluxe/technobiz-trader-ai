@@ -1,13 +1,10 @@
 import { NextRequest } from 'next/server'
 import type { TimeFrame } from '@/types/market'
+import { toYahooSymbol, isCryptoSymbol } from '@/lib/symbolMap'
 
-const YAHOO_INTERVALS: Record<string, string> = {
-  '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
-  '60m': '60m', '1h': '60m', '1d': '1d', '1wk': '1wk', '1mo': '1mo',
-}
-
-async function fetchYahooCandles(symbol: string, interval: string, range: string) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}&range=${range}`
+async function fetchYahooCandles(displaySymbol: string, interval: string, range: string) {
+  const yahooTicker = toYahooSymbol(displaySymbol)
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooTicker)}?interval=${interval}&range=${range}`
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
     next: { revalidate: 60 },
@@ -51,10 +48,6 @@ async function fetchBinanceCandles(symbol: string, interval: string, limit: numb
   }))
 }
 
-function isCrypto(symbol: string) {
-  return /USDT$|USDC$|BTC$|ETH$|BNB$/.test(symbol.toUpperCase())
-}
-
 const TF_TO_BINANCE: Record<string, string> = {
   '1m':'1m','3m':'3m','5m':'5m','15m':'15m','30m':'30m',
   '1h':'1h','2h':'2h','4h':'4h','6h':'6h','12h':'12h',
@@ -83,7 +76,7 @@ export async function GET(req: NextRequest) {
   try {
     let candles
 
-    if (isCrypto(symbol)) {
+    if (isCryptoSymbol(symbol)) {
       const interval = TF_TO_BINANCE[timeframe] ?? '1h'
       candles = await fetchBinanceCandles(symbol.toUpperCase(), interval, Math.min(limit, 1000))
     } else {

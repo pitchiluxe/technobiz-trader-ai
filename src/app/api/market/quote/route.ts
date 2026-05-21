@@ -1,8 +1,5 @@
 import { NextRequest } from 'next/server'
-
-function isCrypto(symbol: string) {
-  return /USDT$|USDC$|BTC$|ETH$|BNB$/.test(symbol.toUpperCase())
-}
+import { toYahooSymbol, isCryptoSymbol } from '@/lib/symbolMap'
 
 async function fetchBinanceQuote(symbol: string) {
   const sym = symbol.toUpperCase()
@@ -11,24 +8,26 @@ async function fetchBinanceQuote(symbol: string) {
     fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}`, { next: { revalidate: 10 } }),
   ])
 
+  if (!priceRes.ok || !statsRes.ok) throw new Error(`Binance quote failed`)
   const [price, stats] = await Promise.all([priceRes.json(), statsRes.json()])
 
   return {
     symbol: sym,
-    price: parseFloat(price.price),
-    change: parseFloat(stats.priceChange),
-    changePercent: parseFloat(stats.priceChangePercent),
-    volume: parseFloat(stats.volume),
-    high: parseFloat(stats.highPrice),
-    low: parseFloat(stats.lowPrice),
-    open: parseFloat(stats.openPrice),
-    prevClose: parseFloat(stats.prevClosePrice),
+    price: parseFloat(price.price) || 0,
+    change: parseFloat(stats.priceChange) || 0,
+    changePercent: parseFloat(stats.priceChangePercent) || 0,
+    volume: parseFloat(stats.volume) || 0,
+    high: parseFloat(stats.highPrice) || 0,
+    low: parseFloat(stats.lowPrice) || 0,
+    open: parseFloat(stats.openPrice) || 0,
+    prevClose: parseFloat(stats.prevClosePrice) || 0,
     timestamp: Math.floor(Date.now() / 1000),
   }
 }
 
-async function fetchYahooQuote(symbol: string) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`
+async function fetchYahooQuote(displaySymbol: string) {
+  const yahooTicker = toYahooSymbol(displaySymbol)
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooTicker)}?interval=1d&range=1d`
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' },
     next: { revalidate: 30 },
@@ -46,7 +45,7 @@ async function fetchYahooQuote(symbol: string) {
   const changePercent = prevClose > 0 ? (change / prevClose) * 100 : 0
 
   return {
-    symbol: symbol.toUpperCase(),
+    symbol: displaySymbol.toUpperCase(),
     price,
     change,
     changePercent,
@@ -64,7 +63,7 @@ export async function GET(req: NextRequest) {
   const symbol = new URL(req.url).searchParams.get('symbol') ?? 'BTCUSDT'
 
   try {
-    const quote = isCrypto(symbol)
+    const quote = isCryptoSymbol(symbol)
       ? await fetchBinanceQuote(symbol)
       : await fetchYahooQuote(symbol)
 

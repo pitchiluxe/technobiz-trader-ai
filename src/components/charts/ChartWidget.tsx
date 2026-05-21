@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useChartData } from '@/hooks/useChartData'
+import { useWorkspaceStore } from '@/stores/useWorkspaceStore'
 import { calcEMA, calcBollingerBands, calcVWAP } from '@/lib/indicators'
 import { CHART_COLORS, INDICATOR_COLORS } from '@/lib/constants'
 import type { ChartPane } from '@/types/chart'
@@ -25,6 +26,7 @@ export default function ChartWidget({ pane, isActive, onActivate }: Props) {
   const indicatorSeriesRef = useRef<Map<string, LC>>(new Map())
   const [chartReady, setChartReady] = useState(false)
   const cleanupRef = useRef<(() => void) | null>(null)
+  const { updatePane } = useWorkspaceStore()
 
   const { candles, isLoading } = useChartData({
     symbol: pane.symbol,
@@ -134,13 +136,19 @@ export default function ChartWidget({ pane, isActive, onActivate }: Props) {
   const updateIndicators = useCallback(async (sorted: Candle[]) => {
     if (!chartRef.current) return
 
+    // Handle volume visibility
+    const volumeInd = pane.indicators.find(i => i.type === 'VOLUME')
+    if (volumeSeriesRef.current) {
+      volumeSeriesRef.current.applyOptions({ visible: !volumeInd || volumeInd.visible })
+    }
+
     indicatorSeriesRef.current.forEach(s => {
       try { chartRef.current?.removeSeries(s) } catch {}
     })
     indicatorSeriesRef.current.clear()
 
     for (const ind of pane.indicators) {
-      if (!ind.visible) continue
+      if (!ind.visible || ind.type === 'VOLUME') continue
       try {
         if (ind.type === 'EMA') {
           const period = (ind.params.period as number) ?? 20
@@ -228,8 +236,26 @@ export default function ChartWidget({ pane, isActive, onActivate }: Props) {
         {isLoading && (
           <span className="text-tv-text-dim text-xs animate-pulse drop-shadow">Loading...</span>
         )}
-        {pane.indicators.map(ind => ind.visible && (
-          <span key={ind.id} className="text-xs text-tv-text-dim drop-shadow">{ind.type}</span>
+        {pane.indicators.map(ind => (
+          <button
+            key={ind.id}
+            onClick={(e) => {
+              e.stopPropagation()
+              updatePane(pane.id, {
+                indicators: pane.indicators.map(i =>
+                  i.id === ind.id ? { ...i, visible: !i.visible } : i
+                ),
+              })
+            }}
+            title={ind.visible ? 'Click to hide' : 'Click to show'}
+            className={`text-xs drop-shadow px-1 rounded transition-colors pointer-events-auto ${
+              ind.visible
+                ? 'text-tv-accent hover:text-tv-red'
+                : 'text-tv-text-dim/40 line-through hover:text-tv-text-dim'
+            }`}
+          >
+            {ind.type}{ind.params?.period ? ` ${ind.params.period}` : ''}
+          </button>
         ))}
       </div>
 

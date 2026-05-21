@@ -60,7 +60,15 @@ export default function ChartToolbar() {
     const periodMatch = label.match(/\d+/)
     const period = periodMatch ? parseInt(periodMatch[0]) : 14
     const existing = activePane.indicators.find(i => i.type === type && i.params.period === period)
-    if (existing) return
+    if (existing) {
+      // Toggle visibility instead of ignoring
+      const updated = activePane.indicators.map(i =>
+        i.id === existing.id ? { ...i, visible: !i.visible } : i
+      )
+      updatePane(activePane.id, { indicators: updated })
+      setShowIndicators(false)
+      return
+    }
 
     const ind = { id: generateId(), type, params: { period }, visible: true }
     updatePane(activePane.id, { indicators: [...activePane.indicators, ind] })

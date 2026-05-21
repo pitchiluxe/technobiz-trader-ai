@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import { useAIStore } from '@/stores/useAIStore'
+import { parseTradeSetup } from '@/lib/parseTradeSetup'
 import type { Candle } from '@/types/market'
 
 interface AnalysisOptions {
@@ -81,10 +82,8 @@ export function useAIAnalysis() {
         }
       }
 
-      // Try to parse a trade setup from the full content
-      const { aiService } = await import('@/services/ai/AIService')
       const tradeSetup = includeTradeSetup
-        ? aiService.parseTradeSetup(fullContent, symbol)
+        ? parseTradeSetup(fullContent, symbol)
         : undefined
 
       updateMessage(assistantId, { isStreaming: false, tradeSetup })

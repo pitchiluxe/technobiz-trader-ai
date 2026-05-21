@@ -15,19 +15,33 @@ export const TIMEFRAMES: { value: TimeFrame; label: string }[] = [
 ]
 
 export const DEFAULT_SYMBOLS = [
+  // Crypto
   { symbol: 'BTCUSDT', name: 'Bitcoin', type: 'crypto' },
   { symbol: 'ETHUSDT', name: 'Ethereum', type: 'crypto' },
   { symbol: 'SOLUSDT', name: 'Solana', type: 'crypto' },
   { symbol: 'BNBUSDT', name: 'BNB', type: 'crypto' },
   { symbol: 'XRPUSDT', name: 'Ripple', type: 'crypto' },
-  { symbol: 'ADAUSDT', name: 'Cardano', type: 'crypto' },
-  { symbol: 'DOGEUSDT', name: 'Dogecoin', type: 'crypto' },
-  { symbol: 'AVAXUSDT', name: 'Avalanche', type: 'crypto' },
+  // Forex
+  { symbol: 'EURUSD', name: 'Euro / Dollar', type: 'forex' },
+  { symbol: 'GBPUSD', name: 'Pound / Dollar', type: 'forex' },
+  { symbol: 'USDJPY', name: 'Dollar / Yen', type: 'forex' },
+  { symbol: 'AUDUSD', name: 'Aussie / Dollar', type: 'forex' },
+  { symbol: 'USDCAD', name: 'Dollar / CAD', type: 'forex' },
+  // Metals
+  { symbol: 'XAUUSD', name: 'Gold', type: 'commodity' },
+  { symbol: 'XAGUSD', name: 'Silver', type: 'commodity' },
+  // Indices
+  { symbol: 'NAS100', name: 'NASDAQ 100', type: 'index' },
+  { symbol: 'US500', name: 'S&P 500', type: 'index' },
+  { symbol: 'US30', name: 'Dow Jones', type: 'index' },
+  { symbol: 'GER40', name: 'DAX 40', type: 'index' },
+  // Energy
+  { symbol: 'USOIL', name: 'WTI Crude Oil', type: 'commodity' },
 ]
 
 export const DEFAULT_WATCHLIST = [
-  'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT',
-  'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'AVAXUSDT',
+  'BTCUSDT', 'ETHUSDT', 'XAUUSD', 'NAS100',
+  'EURUSD', 'GBPUSD', 'SOLUSDT', 'USOIL',
 ]
 
 export const CHART_COLORS = {
