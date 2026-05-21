@@ -40,11 +40,8 @@ export function useChartData({
     setError(null)
 
     try {
-      const res = await fetch(
-        `/api/market/candles?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&limit=${limit}`
-      )
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data: Candle[] = await res.json()
+      const provider = providerFactory.getForSymbol(symbol)
+      const data = await provider.fetchCandles({ symbol, timeframe, limit })
       setCandles(data)
       setLastUpdate(Date.now())
     } catch (err) {
@@ -59,29 +56,27 @@ export function useChartData({
     if (prevKey.current === key) return
     prevKey.current = key
 
-    // Clean up previous subscription
     if (unsubRef.current) { unsubRef.current(); unsubRef.current = null }
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
 
     fetchCandles()
 
     if (isCryptoSymbol(symbol)) {
-      // Subscribe to live updates via Binance WebSocket
+      // Binance WebSocket for real-time candle updates
       const provider = providerFactory.getForSymbol(symbol)
       if (provider.subscribeToCandleUpdates) {
         unsubRef.current = provider.subscribeToCandleUpdates(symbol, timeframe, (newCandle) => {
           setCandles(prev => {
             if (prev.length === 0) return [newCandle]
             const last = prev[prev.length - 1]
-            if (last.time === newCandle.time) {
-              return [...prev.slice(0, -1), newCandle]
-            }
+            if (last.time === newCandle.time) return [...prev.slice(0, -1), newCandle]
             return [...prev.slice(-limit + 1), newCandle]
           })
           setLastUpdate(Date.now())
         })
       }
     } else {
-      // Poll every 60s for non-crypto (Yahoo Finance has no WebSocket)
+      // Yahoo Finance has no WebSocket — poll every 60s
       pollRef.current = setInterval(fetchCandles, 60000)
     }
 

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest } from 'next/server'
 import type { TimeFrame } from '@/types/market'
 import { toYahooSymbol, isCryptoSymbol } from '@/lib/symbolMap'
