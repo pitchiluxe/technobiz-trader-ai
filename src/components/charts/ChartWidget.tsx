@@ -41,7 +41,7 @@ export default function ChartWidget({ pane, isActive, onActivate }: Props) {
 
   const { updatePane } = useWorkspaceStore()
 
-  const { candles, isLoading } = useChartData({
+  const { candles, isLoading, error } = useChartData({
     symbol: pane.symbol,
     timeframe: pane.timeframe,
     limit: 300,
@@ -443,6 +443,7 @@ export default function ChartWidget({ pane, isActive, onActivate }: Props) {
         <span className="text-white font-bold text-sm font-mono drop-shadow">{pane.symbol}</span>
         <span className="text-tv-text-dim text-xs drop-shadow">{pane.timeframe.toUpperCase()}</span>
         {isLoading && <span className="text-tv-text-dim text-xs animate-pulse drop-shadow">Loading...</span>}
+        {error && !isLoading && <span className="text-tv-red text-xs drop-shadow">Data unavailable</span>}
         {pane.indicators.map(ind => (
           <button
             key={ind.id}

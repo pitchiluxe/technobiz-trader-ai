@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Candle, TimeFrame } from '@/types/market'
-import { providerFactory } from '@/services/dataProviders/ProviderFactory'
 import { isCryptoSymbol } from '@/lib/symbolMap'
+import { providerFactory } from '@/services/dataProviders/ProviderFactory'
 
 interface UseChartDataOptions {
   symbol: string
@@ -49,13 +49,6 @@ export function useChartData({
       setLastUpdate(Date.now())
     } catch (err) {
       setError(String(err))
-      // fallback to mock
-      try {
-        const mock = providerFactory.getMock()
-        const data = await mock.fetchCandles({ symbol, timeframe, limit })
-        setCandles(data)
-        setLastUpdate(Date.now())
-      } catch {}
     } finally {
       setIsLoading(false)
     }
