@@ -28,7 +28,7 @@ export default function AIAssistant() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const activePane = layout.panes.find((p: ChartPane) => p.id === layout.activePane)
+  const activePane = layout.panes?.find((p: ChartPane) => p.id === layout.activePane)
   const activeSymbol = activePane?.symbol ?? 'BTCUSDT'
   const activeTimeframe = activePane?.timeframe ?? '1h'
 

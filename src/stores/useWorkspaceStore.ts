@@ -106,7 +106,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
     })),
     {
       name: 'technobiz-workspace',
-      version: 1,
+      version: 2,
+      partialize: (state: WorkspaceState) => ({
+        sidebarLeft: state.sidebarLeft,
+        sidebarRight: state.sidebarRight,
+        bottomPanel: state.bottomPanel,
+        activeTab: state.activeTab,
+        rightTab: state.rightTab,
+      }),
     }
   )
 )

@@ -35,7 +35,7 @@ export default function ChartToolbar() {
   const [showSymbolInput, setShowSymbolInput] = useState(false)
   const [symbolInput, setSymbolInput] = useState('')
 
-  const activePane = (layout.panes as import('@/types/chart').ChartPane[]).find(p => p.id === layout.activePane)
+  const activePane = (layout.panes as import('@/types/chart').ChartPane[] | undefined)?.find(p => p.id === layout.activePane)
   const { analyzeMarket } = useAIAnalysis()
   const { candles } = useChartData({
     symbol: activePane?.symbol ?? 'BTCUSDT',
