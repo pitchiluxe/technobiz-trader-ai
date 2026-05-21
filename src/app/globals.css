@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 5%;
+    --foreground: 210 40% 86%;
+    --card: 222 40% 10%;
+    --card-foreground: 210 40% 86%;
+    --popover: 222 40% 10%;
+    --popover-foreground: 210 40% 86%;
+    --primary: 226 100% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 35% 15%;
+    --secondary-foreground: 210 40% 86%;
+    --muted: 222 35% 15%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 226 100% 59%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 358 75% 59%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 30% 18%;
+    --input: 222 35% 12%;
+    --ring: 226 100% 59%;
+    --radius: 0.5rem;
+    --chart-1: 226 100% 59%;
+    --chart-2: 160 60% 34%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-tv-bg text-tv-text;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  html {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0F1117;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2D3148;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3D4160;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  }
+}
+
+/* Framer Motion */
+.framer-motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* TradingView chart container */
+.tv-chart-container {
+  background: #0F1117;
+}
+
+/* AI streaming cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+/* Ticker animation */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.ticker-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-flex;
+  animation: ticker-scroll 30s linear infinite;
+}
+
+.ticker-content:hover {
+  animation-play-state: paused;
+}

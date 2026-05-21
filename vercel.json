@@ -1,0 +1,29 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "env": {
+    "ANTHROPIC_BASE_URL": "@anthropic_base_url",
+    "ANTHROPIC_AUTH_TOKEN": "@anthropic_auth_token",
+    "ANTHROPIC_MODEL": "@anthropic_model",
+    "SMTP_HOST": "@smtp_host",
+    "SMTP_PORT": "@smtp_port",
+    "SMTP_USER": "@smtp_user",
+    "SMTP_PASS": "@smtp_pass",
+    "EMAIL_FROM": "@email_from",
+    "DEFAULT_SIGNAL_EMAIL": "@default_signal_email",
+    "OLLAMA_BASE_URL": "@ollama_base_url"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization" }
+      ]
+    }
+  ]
+}
